@@ -50,9 +50,32 @@ velocityY = 0
 game_over = False
 score = 0
 
+# Function to place food in a valid location
+def place_food():
+    while True:
+        new_x = random.randint(0, COLS - 1) * TILE_SIZE
+        new_y = random.randint(0, COLS - 1) * TILE_SIZE
+        # check if the food is not on the snake's body or head
+        if all(tile.x != new_x or tile.y != new_y for tile in snake_body) and (snake.x != new_x or snake.y != new_y):
+            food.x = new_x
+            food.y = new_y
+            break
+
+# Function to restart the game
+def restart_game():
+    global snake, food, snake_body, velocityX, velocityY, game_over, score
+    snake = Tile(5 * TILE_SIZE, 5 * TILE_SIZE)  # Reset snake's position
+    snake_body = []  # Clear snake body
+    velocityX = 0
+    velocityY = 0
+    score = 0
+    game_over = False
+    place_food()  # Place food in a valid position
+
 def change_direction(e):
     global velocityX, velocityY, game_over
     if (game_over):
+        restart_game() # Restart the game if a key is pressed after game over
         return 
 
     if (e.keysym == "Up" and velocityY != 1):
@@ -83,10 +106,9 @@ def move():
             return
 
     # collision
-    if (snake.x == food.x and snake.y == food.y):
-        snake_body.append(Tile(food.x, food.y))
-        food.x = random.randint(0, COLS-1) * TILE_SIZE
-        food.y = random.randint(0, ROWS-1) * TILE_SIZE
+    if snake.x == food.x and snake.y == food.y:
+        snake_body.append(Tile(food.x, food.y))  # Grow snake
+        place_food()  # Relocate food
         score += 1
 
     # update snake body
@@ -119,7 +141,7 @@ def draw():
         canvas.create_rectangle(tile.x, tile.y, tile.x + TILE_SIZE, tile.y + TILE_SIZE, fill = "lime green")
 
     if (game_over):
-        canvas.create_text(WINDOW_WIDTH/2, WINDOW_HEIGHT/2, font = "Arial 20", text = f"Game Over: {score}", fill = "white")
+        canvas.create_text(WINDOW_WIDTH/2, WINDOW_HEIGHT/2, font = "Arial 20", text = f"Game Over: {score} \n\n Press any button to Continue", fill = "white")
     else:
         canvas.create_text(30, 20, font="Arial 10", text = f"Score: {score}", fill="white")
 
